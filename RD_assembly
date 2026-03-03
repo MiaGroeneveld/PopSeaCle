@@ -1,0 +1,179 @@
+#### Population and seascape genomics of the whitespotted (_Rhynchobatus djiddensis_; A)  and bottlenose (_R. australiae_; B) wedgefishes (Part I) ###
+
+### Overview ###
+# This repository contains QC, filtering and denovo assembly scripts used to process raw 3RADseq data for _Rhynchobatus djiddensis_ generated using the NovaSeq S4 high-throughput sequencing (HTS) platforms with paired end (PE) sequencing (2 × 150 bp). PBS scripts are in [brackets]. 
+# Our pipeline consists of the following steps:
+
+### Step 1: preparing raw data ###
+## 1.1: Download raw data via filesender onto the HPC via an interactive job (password protected)
+qsub -I -l select=1:ncpus=2:mem=4gb -l walltime=20:00:00
+cd $HOME/radseq
+wget --user=maduna-radlibs11 --ask-password --accept "*.tar" --recursive --no-directories --no-parent https://hts-nonsecure.web.sigma2.no/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
+
+# unzip and check using md5sum [md5sum.sh]
+tar -xvf 260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06.tar
+md5sum -c md5sum.txt
+
+# ----------------------------------------------------------------------------------------------------------------------------
+### _Rhynchobatus djiddensis_ ###
+## 1.2: Quality control of the raw datasets using fastqc [mergeA.sh] [fastqcA.sh]
+# Merge reads first as two dual-indexing combinations are used per plate
+# R1
+cat /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10-1_S3_L001_R1_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10-2_S4_L001_R1_001.fastq.gz > /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz
+# R2
+cat /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10-1_S3_L001_R2_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10-2_S4_L001_R2_001.fastq.gz > /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+
+# fastqc
+module load app/fastqc/0.11.5
+# R1
+fastqc /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz
+# R2
+fastqc /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+
+### Step 2: demultiplexing to the sample level: adapter-trimmed versus untrimmed ###
+# create three new directories:
+# /new-home/mjgroeneveld/radseq/RD_demultiplex/
+# /new-home/mjgroeneveld/radseq/RD_demultiplex_A/
+# /new-home/mjgroeneveld/radseq/RD_demultiplex_T/
+
+# check file type to specify -b barcodes --X
+zcat Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz | head -n 8
+zcat Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz | head -n 8
+# prepare intags_d2.txt file with sample IDs
+
+## 2.1: Find and remove adapter sequences using Cutadapt [cutadaptA.sh]
+module load app/cutadapt/1.9.1
+
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT --pair-filter=any -o /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/RD.R1.trimmed.fastq.gz -p /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/RD.R2.trimmed.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+
+## 2.2: demultiplex with process_radtags under three different strategies
+# (a) untrimmed [process_radtagsA.sh]
+cd $PBS_O_WORKDIR
+module load app/stacks/2.68
+
+datadir=/new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
+datadir2=/new-home/mjgroeneveld/radseq/RD_demultiplex/files/
+resultsdir=/new-home/mjgroeneveld/radseq/RD_demultiplex/reads/
+
+/apps/stacks/2.59/bin/process_radtags \
+  -1 $datadir/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz \
+  -2 $datadir/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz \
+  -i gzfastq \
+  -b $datadir2/intags_d2_RD.txt --inline_inline \
+  -o $resultsdir/ \
+  -c -q -r -t 140 -w 0.15 -s 10 \
+  --renz_1 mspI \
+  --renz_2 bamHI
+
+# (b) trimmed (cutadapt) [process_radtagsA_T.sh]
+cd "$PBS_O_WORKDIR"
+module load app/stacks/2.59
+
+datadir=/new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
+datadir2=/new-home/mjgroeneveld/radseq/RD_demultiplex_T/files/
+resultsdir=/new-home/mjgroeneveld/radseq/RD_demultiplex_T/reads/
+
+/apps/stacks/2.59/bin/process_radtags \
+  -1 $datadir/RD.R1.trimmed.fastq.gz \
+  -2 $datadir/RD.R2.trimmed.fastq.gz \
+  -i gzfastq \
+  -b $datadir2/intags_d2_RD.txt --inline_inline \
+  -o $resultsdir/ \
+  -c -q -r -t 140 -w 0.15 -s 10 \
+  --renz_1 mspI \
+  --renz_2 bamHI
+
+# (c) untrimmed dataset - specifying adapters *this is likely to be the best one [process_radtagsA2.sh]
+cd "$PBS_O_WORKDIR"
+module load app/stacks/2.59
+
+datadir=/new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
+datadir2=/new-home/mjgroeneveld/radseq/RD_demultiplex_A/files/
+resultsdir=/new-home/mjgroeneveld/radseq/RD_demultiplex_A/reads/
+
+/apps/stacks/2.59/bin/process_radtags \
+  -1 $datadir/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz \
+  -2 $datadir/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz \
+  -i gzfastq \
+  -b $datadir2/intags_d2_RD.txt --inline_inline \
+  -o $resultsdir/ \
+  --adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
+  --adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+  --adapter_mm 2 \
+  -c -q -r -t 140 -w 0.15 -s 10 \
+  --renz_1 mspI \
+  --renz_2 bamHI
+
+## 2.3 comparing trimming strategies [extract_tsv_AT2.sh]
+# extract per-sample read counts for each run
+stacks-dist-extract process_radtagsA.log per_barcode_raw_read_counts > persamplecounts_A.tsv
+stacks-dist-extract process_radtagsA_T.log per_barcode_raw_read_counts > persamplecounts_AT.tsv
+stacks-dist-extract process_radtagsA2.log per_barcode_raw_read_counts > persamplecounts_A2.tsv
+
+# compare tsv files on R [trimming_compare.txt]
+# proceeding with A2: no cutadapt, adapters specified in process_radtags
+
+## 2.4 QC of clean reads per sample
+# OPTIONAL: run fastqc on PE reads on hpc and generate a report [fastqcr.rmd]
+
+### Step 3: parameter optimisation using RADstackhelpR
+## 3.1 examine the properties of the sample-level datasets (.tsv) and select a panel of samples (n = 20) suitable for use in STACKS parameter optimization (m; M, n) for the _de novo_ RAD loci assembly strategy
+# ~equal representation between sampling locations as well as close to average reads
+
+## m [radstackhelpT_optim_m.sh]
+module load app/stacks/2.59
+# work directory as new folders will be created from here
+WORK=/new-home/mjgroeneveld/radseq/RD_assembly_A/optim/
+# fastq read files
+READS_DIR=/new-home/mjgroeneveld/radseq/RD_demultiplex_A/reads/
+# popmap file
+POPMAP=/new-home/mjgroeneveld/radseq/RD_assembly_A/optim/popmap_optim.txt
+
+for m in {3..7}; do
+
+  OUT=$WORK/denovo.m${m}
+  mkdir -p $OUT
+
+  echo "Running m=$m"
+
+  /apps/stacks/2.59/bin/denovo_map.pl \
+    --samples $READS_DIR \
+    --popmap $POPMAP \
+    --out-path $OUT \
+    --paired \
+    -m $m \
+    -T 12 \
+    -X "populations: --vcf" \
+    > $OUT/denovo_map.log 2>&1
+
+done
+
+## visualise using RADstackshelpR
+# rename and download populations.vcf files
+# run R script [radstackshelpr_visualisation.txt]
+# optimized m = 3 (default)
+
+## M [radstackshelpr_optim_bigM.sh]
+for i in {1..8}; do
+
+  OUT=$WORK/denovo.bigM${i}
+  mkdir -p $OUT
+
+  echo "Running M=$i"
+
+  /apps/stacks/2.59/bin/denovo_map.pl \
+    --samples $READS_DIR \
+    --popmap $POPMAP \
+    --out-path $OUT \
+    --paired \
+    -m 3 \
+    -M $i \
+    -T 12 \
+    -X "populations: --vcf" \
+    > $OUT/denovo_map.log 2>&1
+
+done
+
+# rename and download populations.vcf files
+# run R script [radstackshelpr_visualisation.txt]
+# optimized M = 
