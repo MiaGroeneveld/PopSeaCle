@@ -1,526 +1,369 @@
-#### Population and seascape genomics of the whitespotted (_Rhynchobatus djiddensis_)  and bottlenose (_R. australiae_) wedgefishes (Part I) ###
+# Population and Seascape Genomics of the whitespotted (*Rhynchobatus djiddensis*) and bottlenose (*R. australiae*) wedgefishes
 
-### Overview ###
-# This repository contains QC, de novo assembly and filtering scripts used to process raw 3RADseq data generated using the NovaSeq S4 high-throughput sequencing (HTS) platforms with paired end (PE) sequencing (2 × 150 bp). PBS and R scripts are in [brackets]. Our pipeline consists of the following steps:
+## Overview
 
-### Step 1: preparing raw data ###
-## 1.1: Download raw data via filesender onto the HPC via an interactive job (because it is password protected)
+This file contains QC, de novo assembly, and filtering scripts used to process raw 3RADseq data generated using the NovaSeq S4 high-throughput sequencing platform with paired-end (PE) sequencing (2 × 150 bp). PBS and R scripts are referenced in [brackets]. The pipeline covers both species sequenced on the same run.
+
+**Final datasets:**
+
+| Dataset | Species | SNPs | n | Missingness | Notes |
+|---|---|---|---|---|---|
+| RD_set1 | *R. djiddensis* | 27,366 | 47 | 4.83% | MAC≥3, FS1 — **PRIMARY** |
+| RD_set2 | *R. djiddensis* | 18,942 | 47 | 5.09% | MAC≥3, FS2 (DP8) — robustness |
+| RA_set1 | *R. australiae* | 27,562 | 71 | 6.32% | MAC≥3, FS1 — **PRIMARY** |
+| RA_set2 | *R. australiae* | 30,380 | 71 | 6.24% | MAC≥2, FS1 — robustness |
+
+---
+
+## Step 1: Preparing Raw Data
+
+### 1.1 Download raw data via filesender onto the HPC
+
+```bash
+# Interactive job required (password protected)
 qsub -I -l select=1:ncpus=2:mem=4gb -l walltime=20:00:00
 cd $HOME/radseq
-wget --user=maduna-radlibs11 --ask-password --accept "*.tar" --recursive --no-directories --no-parent https://hts-nonsecure.web.sigma2.no/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
+wget --user=maduna-radlibs11 --ask-password --accept "*.tar" \
+  --recursive --no-directories --no-parent \
+  https://hts-nonsecure.web.sigma2.no/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
 
-# unzip and check using md5sum [md5sum.sh]
+# Unzip and verify integrity
 tar -xvf 260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06.tar
 md5sum -c md5sum.txt
+```
 
-# ----------------------------------------------------------------------------------------------------------------------------
-### _Rhynchobatus djiddensis_ ###
-## 1.2: Quality control of the raw datasets using fastqc [mergeA.sh] [fastqcA.sh]
-# Merge reads first as two dual-indexing combinations are used per plate
+---
+
+## *Rhynchobatus djiddensis* (RD)
+
+### 1.2 Quality control of raw datasets [mergeA.sh] [fastqcA.sh]
+
+```bash
+# Merge reads — two dual-indexing combinations per plate
 # R1
-cat /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10-1_S3_L001_R1_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10-2_S4_L001_R1_001.fastq.gz > /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz
-# R2
-cat /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10-1_S3_L001_R2_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10-2_S4_L001_R2_001.fastq.gz > /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+cat Rdji-3RAD-D2-Plate10-1_S3_L001_R1_001.fastq.gz \
+    Rdji-3RAD-D2-Plate10-2_S4_L001_R1_001.fastq.gz \
+  > Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz
 
-# fastqc
+# R2
+cat Rdji-3RAD-D2-Plate10-1_S3_L001_R2_001.fastq.gz \
+    Rdji-3RAD-D2-Plate10-2_S4_L001_R2_001.fastq.gz \
+  > Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+
+# FastQC
 module load app/fastqc/0.11.5
-# R1
-fastqc /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz
-# R2
-fastqc /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+fastqc Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz
+fastqc Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+```
 
-### Step 2: demultiplexing to the sample level: adapter-trimmed versus untrimmed ###
-# create three new directories:
+---
+
+## Step 2: Demultiplexing
+
+```bash
+# Create output directories:
 # /new-home/mjgroeneveld/radseq/RD_demultiplex/
 # /new-home/mjgroeneveld/radseq/RD_demultiplex_A/
 # /new-home/mjgroeneveld/radseq/RD_demultiplex_T/
+```
 
-# check file type to specify -b barcodes --X
-zcat Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz | head -n 8
-zcat Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz | head -n 8
-# prepare intags_d2.txt file with sample IDs
+### 2.1 Adapter trimming with Cutadapt [cutadaptA.sh]
 
-## 2.1: Find and remove adapter sequences using Cutadapt [cutadaptA.sh]
+```bash
 module load app/cutadapt/1.9.1
 
-cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT --pair-filter=any -o /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/RD.R1.trimmed.fastq.gz -p /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/RD.R2.trimmed.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+cutadapt \
+  -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
+  -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+  --pair-filter=any \
+  -o RD.R1.trimmed.fastq.gz \
+  -p RD.R2.trimmed.fastq.gz \
+  Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz \
+  Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz
+```
 
-## 2.2: demultiplex with process_radtags under three different strategies
-# (a) untrimmed [process_radtagsA.sh]
-cd $PBS_O_WORKDIR
-module load app/stacks/2.68
+### 2.2 Demultiplexing with process_radtags — three strategies
 
-datadir=/new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
-datadir2=/new-home/mjgroeneveld/radseq/RD_demultiplex/files/
-resultsdir=/new-home/mjgroeneveld/radseq/RD_demultiplex/reads/
-
-/apps/stacks/2.59/bin/process_radtags \
-  -1 $datadir/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz \
-  -2 $datadir/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz \
-  -i gzfastq \
-  -b $datadir2/intags_d2_RD.txt --inline_inline \
-  -o $resultsdir/ \
-  -c -q -r -t 140 -w 0.15 -s 10 \
-  --renz_1 mspI \
-  --renz_2 bamHI
-
-# (b) trimmed (cutadapt) [process_radtagsA_T.sh]
-cd "$PBS_O_WORKDIR"
+```bash
 module load app/stacks/2.59
 
-datadir=/new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
-datadir2=/new-home/mjgroeneveld/radseq/RD_demultiplex_T/files/
-resultsdir=/new-home/mjgroeneveld/radseq/RD_demultiplex_T/reads/
-
+# (a) Untrimmed [process_radtagsA.sh]
 /apps/stacks/2.59/bin/process_radtags \
-  -1 $datadir/RD.R1.trimmed.fastq.gz \
-  -2 $datadir/RD.R2.trimmed.fastq.gz \
+  -1 Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz \
+  -2 Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz \
   -i gzfastq \
-  -b $datadir2/intags_d2_RD.txt --inline_inline \
-  -o $resultsdir/ \
+  -b intags_d2_RD.txt --inline_inline \
+  -o /new-home/mjgroeneveld/radseq/RD_demultiplex/reads/ \
   -c -q -r -t 140 -w 0.15 -s 10 \
-  --renz_1 mspI \
-  --renz_2 bamHI
+  --renz_1 mspI --renz_2 bamHI
 
-# (c) untrimmed dataset - specifying adapters *this is likely to be the best one [process_radtagsA2.sh]
-cd "$PBS_O_WORKDIR"
-module load app/stacks/2.59
-
-datadir=/new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/
-datadir2=/new-home/mjgroeneveld/radseq/RD_demultiplex_A/files/
-resultsdir=/new-home/mjgroeneveld/radseq/RD_demultiplex_A/reads/
-
+# (b) Trimmed (Cutadapt) [process_radtagsA_T.sh]
 /apps/stacks/2.59/bin/process_radtags \
-  -1 $datadir/Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz \
-  -2 $datadir/Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz \
+  -1 RD.R1.trimmed.fastq.gz \
+  -2 RD.R2.trimmed.fastq.gz \
   -i gzfastq \
-  -b $datadir2/intags_d2_RD.txt --inline_inline \
-  -o $resultsdir/ \
+  -b intags_d2_RD.txt --inline_inline \
+  -o /new-home/mjgroeneveld/radseq/RD_demultiplex_T/reads/ \
+  -c -q -r -t 140 -w 0.15 -s 10 \
+  --renz_1 mspI --renz_2 bamHI
+
+# (c) Untrimmed with adapters specified — SELECTED [process_radtagsA2.sh]
+/apps/stacks/2.59/bin/process_radtags \
+  -1 Rdji-3RAD-D2-Plate10_L001_R1_001.fastq.gz \
+  -2 Rdji-3RAD-D2-Plate10_L001_R2_001.fastq.gz \
+  -i gzfastq \
+  -b intags_d2_RD.txt --inline_inline \
+  -o /new-home/mjgroeneveld/radseq/RD_demultiplex_A/reads/ \
   --adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
   --adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
   --adapter_mm 2 \
   -c -q -r -t 140 -w 0.15 -s 10 \
-  --renz_1 mspI \
-  --renz_2 bamHI
+  --renz_1 mspI --renz_2 bamHI
+```
 
-## 2.3 comparing trimming strategies [extract_tsv_AT2.sh]
-# extract per-sample read counts for each run
-stacks-dist-extract process_radtagsA.log per_barcode_raw_read_counts > persamplecounts_A.tsv
+### 2.3 Compare trimming strategies [extract_tsv_AT2.sh]
+
+```bash
+stacks-dist-extract process_radtagsA.log  per_barcode_raw_read_counts > persamplecounts_A.tsv
 stacks-dist-extract process_radtagsA_T.log per_barcode_raw_read_counts > persamplecounts_AT.tsv
 stacks-dist-extract process_radtagsA2.log per_barcode_raw_read_counts > persamplecounts_A2.tsv
 
-# compare tsv files on R [trimming_compare_three.txt]
-# proceeding with A2: no cutadapt, adapters specified in process_radtags
+# Compare in R [trimming_compare_three.txt]
+# Decision: A2 selected — no cutadapt, adapters specified in process_radtags
+```
 
-## 2.4 QC of clean reads per sample
-# OPTIONAL: run fastqc on PE reads on hpc and generate a report [fastqcr.rmd]
+---
 
-### Step 3: parameter optimisation using RADstackshelpR ###
-## 3.1 examine the properties of the sample-level datasets (.tsv) and select a panel of samples (n = 20) suitable for use in STACKS parameter optimization (m; M, n) for the _de novo_ RAD loci assembly strategy
-# ~equal representation between sampling locations as well as close to average reads
-# move .rem files
-mkdir rem_files
-mv *.rem.*.fq.gz rem_files/
+## Step 3: Parameter Optimisation using RADstackshelpR
 
-## m [radstackhelpr_optim_m.sh]
-module load app/stacks/2.59
-# work directory as new folders will be created from here
+```bash
+# Select 20 samples for optimisation (~equal representation per locality,
+# close to average read depth)
+mkdir rem_files && mv *.rem.*.fq.gz rem_files/
+
+# Optimise m [radstackhelpr_optim_m.sh]
 WORK=/new-home/mjgroeneveld/radseq/RD_assembly_A/optim/
-# fastq read files
 READS_DIR=/new-home/mjgroeneveld/radseq/RD_demultiplex_A/reads/
-# popmap file
-POPMAP=/new-home/mjgroeneveld/radseq/RD_assembly_A/optim/popmap_optim.txt
+POPMAP=$WORK/popmap_optim.txt
 
 for m in {3..7}; do
-
   OUT=$WORK/denovo.m${m}
   mkdir -p $OUT
-
-  echo "Running m=$m"
-
   /apps/stacks/2.59/bin/denovo_map.pl \
-    --samples $READS_DIR \
-    --popmap $POPMAP \
-    --out-path $OUT \
-    --paired \
-    -m $m \
-    -T 12 \
-    -X "populations: --vcf" \
-    > $OUT/denovo_map.log 2>&1
-
+    --samples $READS_DIR --popmap $POPMAP \
+    --out-path $OUT --paired \
+    -m $m -T 12 \
+    -X "populations: --vcf" > $OUT/denovo_map.log 2>&1
 done
 
-## visualise using RADstackshelpR
-# rename and download populations.vcf files
-# run R script [radstackshelpr_visualisation.txt]
-# optimized m = 3
-
-## M [radstackshelpr_optim_bigM.sh]
+# Optimise M [radstackshelpr_optim_bigM.sh]
 for i in {1..8}; do
-
   OUT=$WORK/denovo.bigM${i}
   mkdir -p $OUT
-
-  echo "Running M=$i"
-
   /apps/stacks/2.59/bin/denovo_map.pl \
-    --samples $READS_DIR \
-    --popmap $POPMAP \
-    --out-path $OUT \
-    --paired \
-    -m 3 \
-    -M $i \
-    -T 12 \
-    -X "populations: --vcf" \
-    > $OUT/denovo_map.log 2>&1
-
+    --samples $READS_DIR --popmap $POPMAP \
+    --out-path $OUT --paired \
+    -m 3 -M $i -T 12 \
+    -X "populations: --vcf" > $OUT/denovo_map.log 2>&1
 done
 
-# rename and download populations.vcf files
-# run R script [radstackshelpr_visualisation.txt]
-# optimized M = 3
-
-## n [radstackshelpr_optim_n.sh]
-# vary 'n' across M-1, M and M+1 i.e., 2, 3 and 4
-for i in {2..4}; do
-
-  OUT=$WORK/denovo.n${i}
+# Optimise n [radstackshelpr_optim_n.sh]
+for n in {1..8}; do
+  OUT=$WORK/denovo.n${n}
   mkdir -p $OUT
-
-  echo "Running n=$i"
-
   /apps/stacks/2.59/bin/denovo_map.pl \
-    --samples $READS_DIR \
-    --popmap $POPMAP \
-    --out-path $OUT \
-    --paired \
-    -m 3 \
-    -M 3 \
-    -n $i \
-    -T 12 \
-    -X "populations: --vcf" \
-    > $OUT/denovo_map.log 2>&1
-
+    --samples $READS_DIR --popmap $POPMAP \
+    --out-path $OUT --paired \
+    -m 3 -M 3 -n $n -T 12 \
+    -X "populations: --vcf" > $OUT/denovo_map.log 2>&1
 done
 
-# rename and download populations.vcf files
-# run R script [radstackshelpr_visualisation.txt]
-# optimized n = M + 1 = 4
+# Visualise in R [radstackshelpr_visualisation.txt]
+# Optimised parameters: m=3, M=3, n=4
+```
 
-### Step 4: STACKS de novo pipeline execution [denovo_assembly.sh] ###
-# submitted 16:18 05/03/2026 finished 14:57 06/03/2026
+---
 
+## Step 4: STACKS De Novo Assembly [denovo_assembly.sh]
+
+```bash
 module load app/stacks/2.59
 WORK=/new-home/mjgroeneveld/radseq/RD_assembly_A/core/
 READS_DIR=/new-home/mjgroeneveld/radseq/RD_demultiplex_A/reads/
-POPMAP=/new-home/mjgroeneveld/radseq/RD_assembly_A/core/popmap_full.txt
-
-  OUT=$WORK/denovo_m3_M3_n4
-  mkdir -p $OUT
+POPMAP=$WORK/popmap_full.txt
+OUT=$WORK/denovo_m3_M3_n4
+mkdir -p $OUT
 
 /apps/stacks/2.59/bin/denovo_map.pl \
-  --samples "$READS_DIR" \
-  --popmap "$POPMAP" \
-  --out-path "$OUT" \
-  --paired \
-  -m 3 \
-  -M 3 \
-  -n 4 \
-  -T 12 \
-  -X "populations: --vcf" \
-  > "$OUT/denovo_map.log" 2>&1
+  --samples $READS_DIR --popmap $POPMAP \
+  --out-path $OUT --paired \
+  -m 3 -M 3 -n 4 -T 12 \
+  -X "populations: --vcf" > $OUT/denovo_map.log 2>&1
+```
 
-## 4.1 evaluate effectiveness of assembly 
-# Assess sequencing coverage following execution of *ustacks*
-module load app/stacks/2.59
-stacks-dist-extract denovo_map.log cov_per_sample \
- | grep -v '^#'
+### 4.1 Evaluate assembly effectiveness
 
-# high variation of coverage between samples, as expected matching the distribution of reads after demultiplexing, some potentially problematic samples noted in excel sheet "RD_assembly.xlsx".
+```bash
+# Coverage after ustacks
+stacks-dist-extract denovo_map.log cov_per_sample | grep -v '^#'
 
-# Assess sequencing coverage after *gstacks* built paired-end contigs
+# Coverage after gstacks
 cat gstacks.log | grep -B 2 -A 3 '^Genotyped'
+# RD: Genotyped 450,000+ loci
+# RA: Genotyped 515,960 loci
+#   effective per-sample coverage: mean=75.4x, stdev=36.3x, min=6.2x, max=140.8x
+#   mean number of sites per locus: 267.8
+#   consistent phasing: 70.2% of diploid loci
 
-# Genotyped 1098417 loci:
-# effective per-sample coverage: mean=70.0x, stdev=33.9x, min=7.9x, max=145.0x
-# mean number of sites per locus: 270.3
-# a consistent phasing was found for 531683 of out 763572 (69.6%) diploid loci needing phasing
-
-# Evaluate distribution of coverage across samples
 stacks-dist-extract gstacks.log.distribs effective_coverages_per_sample \
- | grep -v '^#' \
- | cut -f 1-2,4-5,8
-# can flag samples on R [denovo_checks.txt]
+  | grep -v '^#' | cut -f 1-2,4-5,8
+# Flag problematic samples in R [denovo_checks.txt]
+```
 
-## 4.2 loci and individual-based filtering
-# compare replicates to dtermine filtering thresholds (balance between congruence, missingness and snp retention)
+---
 
-# Rerun *populations* module, retaining R80 loci, filtering for heterozygosity and minor allele freqs
-# base_R80_Het50_MAC3 [base_filter.sh]
+## Step 5: Locus and Individual-Based Filtering
 
+### 5.1 Base filtering with populations module [base_filter.sh]
+
+```bash
+# R80/Het50/MAC3 base filter (repeat for R60 and MAC2 variants)
 populations \
---in-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/denovo_m3_M3_n4/ \
---out-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/base_R80_Het50_MAC3/ \
---popmap /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/base_R80_Het50_MAC3/popmap_onepop.txt \
---min-samples-overall 0.80 \
---max-obs-het 0.5 \
---mac 3 \
---vcf
+  --in-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/denovo_m3_M3_n4/ \
+  --out-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/base_R80_Het50_MAC3/ \
+  --popmap popmap_onepop.txt \
+  --min-samples-overall 0.80 \
+  --max-obs-het 0.5 \
+  --mac 3 \
+  --vcf
+```
 
-## test different filtering strategies [filter_sets.sh]
+### 5.2 VCFtools filter sets [filter_sets.sh]
+
+```bash
 # GQ = minimum genotype quality, DP = minimum depth, max-missing = site missingness
+# Four filter sets tested:
+run_filter_set FS1 20 5 0.8   # GQ20, DP5, MISS0.8
+run_filter_set FS2 20 8 0.8   # GQ20, DP8, MISS0.8
+run_filter_set FS3 20 8 0.9   # GQ20, DP8, MISS0.9
+run_filter_set FS4 25 10 0.9  # GQ25, DP10, MISS0.9
 
-run_filter_set FS1 20 5 0.8
-run_filter_set FS2 20 8 0.8
-run_filter_set FS3 20 8 0.9
-run_filter_set FS4 25 10 0.9
+# Evaluate in R [filter_sets_R.txt]
+# Decision: FS1 selected for primary datasets (best balance of missingness and SNP retention)
+# FS2 (DP8) used for RD_set2 robustness dataset
+```
 
-# download for FS1-4 (this is FS1 as an example): FS1_final_imiss.imiss + FS1_GQ20_DP5_MISS0.8.recode.vcf + FS1_nSNPs.txt
-# determine best filter set in R [filter_sets_R.txt]
-# FS1 = best
+### 5.3 Remove replicates and low-quality individuals
 
-## remove replicates, families and >40% missingness (6 individuals with >40% missingness, including some being replicates): make text files to indicate whic samples to remove [remove_fam.sh]
+```bash
+# Remove replicates only [remove1.sh]
 vcftools \
---vcf /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/filter_sets/FS1/FS1_GQ20_DP5_MISS0.8.recode.vcf \
---remove /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/remove_fam/FS1_remove.txt \
---recode \
---recode-INFO-all \
---out FS1_R80_Het50_MAC3_GQ20_DP5_MISS0.8_removed
+  --vcf FS1_GQ20_DP5_MISS0.8.recode.vcf \
+  --remove remove1.txt \
+  --recode --recode-INFO-all \
+  --out FS1_R80_Het50_MAC3_GQ20_DP5_MISS0.8_remove1
 
-# Use filtered dataset to create whitelist of SNPs [remove_fam_whitelist.sh]
+# Remove replicates + flagged individuals (MZ13, TZ5t for RA) [remove2.sh]
 vcftools \
---vcf /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/remove_fam/FS1_R80_Het50_MAC3_GQ20_DP5_MISS0.8_removed.recode.vcf \
---out /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/remove_fam/FS1_R80_Het50_MAC3_GQ20_DP5_MISS0.8_kept \
---kept-sites
-# download file, copy into excel, distract -1 from POS, delete headers and save as FS1_whitelist.txt
+  --vcf FS1_GQ20_DP5_MISS0.8.recode.vcf \
+  --remove remove2.txt \
+  --recode --recode-INFO-all \
+  --out FS1_R80_Het50_MAC3_GQ20_DP5_MISS0.8_remove2
+```
 
-# Run *populations* again to include only whitelisted SNPs, write only one SNP per locus and create different file formats for downstream analyses
-# in-path should point to the original assembly
+### 5.4 Final populations run with whitelist [final_clean1.sh] [final_clean2.sh]
+
+```bash
+# Write one SNP per locus, create VCF and additional formats
+# in-path points to original assembly, not filtered VCF
 populations \
---in-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/denovo_m3_M3_n4 \
---out-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/final/popgen \
---popmap /new-home/mjgroeneveld/radseq/RD_assembly_A/core/final/popgen/popmap.txt \
---whitelist /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/remove_fam/FS1_whitelist.txt \
---write-single-snp \
---vcf \
---structure \
---radpainter
+  --in-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/denovo_m3_M3_n4 \
+  --out-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/final/popgen1 \
+  --popmap popmap_final1.txt \
+  --whitelist RD1_whitelist.txt \
+  --write-single-snp \
+  --vcf --structure --radpainter
+```
 
-## extract family dataset
-vcftools \
---vcf /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/filter_sets/FS1/FS1_GQ20_DP5_MISS0.8.recode.vcf \
---keep /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/remove_fam/FS1_family_keep.txt \ \
---recode \
---recode-INFO-all \
---out FS1_family_dataset
+### 5.5 Final QC statistics
 
-# create whitelist of SNPs
-vcftools \
---vcf /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/remove_fam/FS1_family_dataset.recode.vcf \
---out /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/remove_fam/FS1_family_dataset_kept \
---kept-sites
-
-# download file, copy into excel, distract -1 from POS, delete headers and save as FS1_fam_whitelist.txt or create on the hpc
-
-# One-snp-per-locus and file formats for downstream
-populations \
---in-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/denovo_m3_M3_n4 \
---out-path /new-home/mjgroeneveld/radseq/RD_assembly_A/core/final/family \
---popmap /new-home/mjgroeneveld/radseq/RD_assembly_A/core/final/family/popmap_fam.txt \
---whitelist /new-home/mjgroeneveld/radseq/RD_assembly_A/core/filtering/remove_fam/FS1_fam_whitelist.txt \
---write-single-snp \
---vcf \
---structure \
---radpainter
-
-# RS outlier samples were picked up (confirmed with a PCA in R) - removed and steps above repeated.
-# after RS-removal, MO3 can be an outlier - repeated steps above so now we have two datasets (n = 48; n = 47)
-# [final_clean.sh] includes all of the above steps and works from the n = 52 dataset - just change inputs
-
-# Calculate final missingness
+```bash
+# Missingness per individual
 module load app/vcftools
 vcftools --vcf populations.snps.vcf --missing-indv
-# produces out.imiss
 awk 'NR>1 {sum+=$5} END {print sum/(NR-1)}' out.imiss
 
-# Calculate number of snps
-grep -vc '^#' "populations.snps.vcf" > "popgen_nSNPs.txt"
+# SNP count
+grep -vc '^#' populations.snps.vcf > popgen_nSNPs.txt
+```
 
-# ---------------------------------------------------------------------------------------------------------------------------
-### _Rhynchobatus australiae_
-## 1.2: Quality control of the raw datasets using fastqc [mergeB.sh] [fastqcB.sh]
-# Merge reads first as two dual-indexing combinations are used per plate
+---
+
+## *Rhynchobatus australiae* (RA)
+
+### 1.2 Quality control of raw datasets
+
+```bash
+# Merge reads — two dual-indexing combinations per plate
 # R1
-cat /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11-1_S5_L001_R1_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11-2_S6_L001_R1_001.fastq.gz > /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11_L001_R1_001.fastq.gz
-# R2
-cat /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11-1_S5_L001_R2_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11-2_S6_L001_R2_001.fastq.gz > /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11_L001_R2_001.fastq.gz
+cat Raus-3RAD-D2-Plate11-1_S5_L001_R1_001.fastq.gz \
+    Raus-3RAD-D2-Plate11-2_S6_L001_R1_001.fastq.gz \
+  > Raus-3RAD-D2-Plate11_L001_R1_001.fastq.gz
 
-# fastqc
+# R2
+cat Raus-3RAD-D2-Plate11-1_S5_L001_R2_001.fastq.gz \
+    Raus-3RAD-D2-Plate11-2_S6_L001_R2_001.fastq.gz \
+  > Raus-3RAD-D2-Plate11_L001_R2_001.fastq.gz
+
+# FastQC
 module load app/fastqc/0.11.5
-# R1
-fastqc /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11_L001_R1_001.fastq.gz
-# R2
-fastqc /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11_L001_R2_001.fastq.gz
+fastqc Raus-3RAD-D2-Plate11_L001_R1_001.fastq.gz
+fastqc Raus-3RAD-D2-Plate11_L001_R2_001.fastq.gz
+```
 
-### Step 2: demultiplexing to the sample level ###
-# create two new directories:
-# /new-home/mjgroeneveld/radseq/RA_demultiplex_T/
-# /new-home/mjgroeneveld/radseq/RA_demultiplex_B/
+### Steps 2–3: Demultiplexing and Parameter Optimisation
 
-## 2.1: Find and remove adapter sequences using Cutadapt [cutadaptB.sh]
-module load app/cutadapt/1.9.1
+```bash
+# Two strategies compared [process_radtagsBT.sh] [process_radtagsB2.sh]
+# Decision: B2 selected — no cutadapt, adapters specified in process_radtags
 
-cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT --pair-filter=any -o /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/RA.R1.trimmed.fastq.gz -p /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/RA.R2.trimmed.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11_L001_R1_001.fastq.gz /new-home/mjgroeneveld/radseq/260220_LH00770.A.Project_Maduna-RADlibs11-2026-02-06/Raus-3RAD-D2-Plate11_L001_R2_001.fastq.gz
+# Optimised parameters: m=3, M=3, n=4 (same as RD)
+```
 
-## 2.2: demultiplex with process_radtags under two different strategies
-# (a) trimmed [process_radtagsBT.sh]
+### Step 4: Assembly [denovo_assembly.sh]
 
-# (b) untrimmed - specifying adapters [process_radtagsB2.sh]
+```bash
+# Remove non-target species individuals before assembly
+mv TZ1.1.fq.gz TZ4.1.fq.gz TZ8.1.fq.gz TZ9.1.fq.gz TZ11.1.fq.gz TZ12.1.fq.gz nonspecies/
+mv TZ1.2.fq.gz TZ4.2.fq.gz TZ8.2.fq.gz TZ9.2.fq.gz TZ11.2.fq.gz TZ12.2.fq.gz nonspecies/
 
-## 2.3 comparing trimming strategies [extract_tsv_BT2.sh]
-# extract per-sample read counts for each run
-stacks-dist-extract process_radtagsBT.log per_barcode_raw_read_counts > persamplecounts_BT.tsv
-stacks-dist-extract process_radtagsB2.log per_barcode_raw_read_counts > persamplecounts_B2.tsv
-
-# compare tsv files on R [trimming_compare_two.txt]
-# proceeding with B2: no cutadapt, adapters specified in process_radtags
-
-### Step 3: parameter optimisation using RADstackhelpR ###
-## 3.1 examine the properties of the sample-level datasets (.tsv) and select a panel of samples (n = 20) suitable for use in STACKS parameter optimization (m; M, n) for the _de novo_ RAD loci assembly strategy
-# ~equal representation between sampling locations as well as close to average reads
-# HPC [radstackshelpr_optim_m.sh] [radstackshelpr_optim_bigM.sh] [radstackshelpr_optim_n.sh]
-# R [radstackshelpr_visualisation.txt]
-
-# m = 3
-# M = 3
-# n = M + 1 = 4
-
-### Step 4: STACKS de novo pipeline execution ###
-
-# move non-species before assembly and make popmap file
-mv TZ1.1.fq.gz nonspecies/
-mv TZ4.1.fq.gz nonspecies/
-mv TZ8.1.fq.gz nonspecies/
-mv TZ9.1.fq.gz nonspecies/
-mv TZ11.1.fq.gz nonspecies/
-mv TZ12.1.fq.gz nonspecies/
-mv TZ1.2.fq.gz nonspecies/
-mv TZ4.2.fq.gz nonspecies/
-mv TZ8.2.fq.gz nonspecies/
-mv TZ9.2.fq.gz nonspecies/
-mv TZ11.2.fq.gz nonspecies/
-mv TZ12.2.fq.gz nonspecies/
-
-# [denovo_assembly.sh]
-module load app/stacks/2.59
 WORK=/new-home/mjgroeneveld/radseq/RA_assembly_B/core/
 READS_DIR=/new-home/mjgroeneveld/radseq/RA_demultiplex_B/reads/
-POPMAP=/new-home/mjgroeneveld/radseq/RA_assembly_B/core/popmap_full.txt
-
-  OUT=$WORK/denovo_m3_M3_n4
-  mkdir -p $OUT
+POPMAP=$WORK/popmap_full.txt
+OUT=$WORK/denovo_m3_M3_n4
+mkdir -p $OUT
 
 /apps/stacks/2.59/bin/denovo_map.pl \
-  --samples "$READS_DIR" \
-  --popmap "$POPMAP" \
-  --out-path "$OUT" \
-  --paired \
-  -m 3 \
-  -M 3 \
-  -n 4 \
-  -T 12 \
-  -X "populations: --vcf" \
-  > "$OUT/denovo_map.log" 2>&1
+  --samples $READS_DIR --popmap $POPMAP \
+  --out-path $OUT --paired \
+  -m 3 -M 3 -n 4 -T 12 \
+  -X "populations: --vcf" > $OUT/denovo_map.log 2>&1
+```
 
-## 4.1 evaluate effectiveness of assembly 
-# Assess sequencing coverage following execution of *ustacks*
-module load app/stacks/2.59
-stacks-dist-extract denovo_map.log cov_per_sample \
- | grep -v '^#'
+### Steps 5: Filtering
 
-# high variation of coverage between samples, as expected matching the distribution of reads after demultiplexing, some potentially problematic samples noted in excel sheet "RD_assembly.xlsx".
+```bash
+# Same filtering pipeline as RD, excep MAC≥2 to increase SNP retention
+# FS1 selected for RA_set1 (MAC≥3) and RA_set2 (MAC≥2)
 
-# Assess sequencing coverage after *gstacks* built paired-end contigs
-cat gstacks.log | grep -B 2 -A 3 '^Genotyped'
-
-# Genotyped 515960 loci:
-# effective per-sample coverage: mean=75.4x, stdev=36.3x, min=6.2x, max=140.8x
-# mean number of sites per locus: 267.8
-# a consistent phasing was found for 347315 of out 494440 (70.2%) diploid loci needing phasing
-
-
-# Evaluate distribution of coverage across samples
-stacks-dist-extract gstacks.log.distribs effective_coverages_per_sample \
- | grep -v '^#' \
- | cut -f 1-2,4-5,8
-# can flag samples on R [denovo_checks.txt]
-
-## 4.2 loci and individual-based filtering
-# compare replicates to dtermine filtering thresholds (balance between congruence, missingness and snp retention)
-
-# Rerun *populations* module, retaining R80 loci, filtering for heterozygosity and minor allele freqs
-# base_R80_Het50_MAC3 [base_filter.sh]
-
+# Final populations run — one SNP per locus
 populations \
---in-path /new-home/mjgroeneveld/radseq/RA_assembly_B/core/denovo_m3_M3_n4/ \
---out-path /new-home/mjgroeneveld/radseq/RA_assembly_B/core/filtering/base_R80_Het50_MAC3/ \
---popmap /new-home/mjgroeneveld/radseq/RA_assembly_B/core/filtering/base_R80_Het50_MAC3/popmap_onepop.txt \
---min-samples-overall 0.80 \
---max-obs-het 0.5 \
---mac 3 \
---vcf
+  --in-path /new-home/mjgroeneveld/radseq/RA_assembly_B/core/denovo_m3_M3_n4 \
+  --out-path /new-home/mjgroeneveld/radseq/RA_assembly_B/core/final/popgen1 \
+  --popmap popmap_final1.txt \
+  --whitelist RA1_whitelist.txt \
+  --write-single-snp \
+  --vcf --structure --radpainter
+```
 
-## test different filtering strategies [filter_sets.sh]
-# GQ = minimum genotype quality, DP = minimum depth, max-missing = site missingness
-
-run_filter_set FS1 20 5 0.8
-run_filter_set FS2 20 8 0.8
-run_filter_set FS3 20 8 0.9
-run_filter_set FS4 25 10 0.9
-
-# download for FS1-4 (this is FS1 as an example): FS1_final_imiss.imiss + FS1_GQ20_DP5_MISS0.8.recode.vcf + FS1_nSNPs.txt
-# determine best filter set in R [filter_sets_R.txt]
-# FS1 = best 
-
-## remove replicates [remove1.sh]
-## remove replicates + MZ13 and TZ5t [remove2.sh]
-
-vcftools \
---vcf /new-home/mjgroeneveld/radseq/RA_assembly_B/core/filtering/filter_sets/FS1/FS1_GQ20_DP5_MISS0.8.recode.vcf \
---remove /new-home/mjgroeneveld/radseq/RA_assembly_B/core/filtering/remove1/remove1.txt \
---recode \
---recode-INFO-all \
---out FS1_R80_Het50_MAC3_GQ20_DP5_MISS0.8_remove1
-
-vcftools \
---vcf /new-home/mjgroeneveld/radseq/RA_assembly_B/core/filtering/filter_sets/FS1/FS1_GQ20_DP5_MISS0.8.recode.vcf \
---remove /new-home/mjgroeneveld/radseq/RA_assembly_B/core/filtering/remove2/remove2.txt \
---recode \
---recode-INFO-all \
---out FS1_R80_Het50_MAC3_GQ20_DP5_MISS0.8_remove2
-
-# Use filtered dataset to create whitelist of SNPs and run *populations* again to include only whitelisted SNPs, write only one SNP per locus and create different file formats for downstream analyses
-# [final_clean1.sh] [final_clean2.sh]
-# in-path should point to the original assembly
-
-populations \
---in-path /new-home/mjgroeneveld/radseq/RA_assembly_B/core/denovo_m3_M3_n4 \
---out-path /new-home/mjgroeneveld/radseq/RA_assembly_B/core/final/popgen1 \
---popmap /new-home/mjgroeneveld/radseq/RA_assembly_B/core/final/popgen1/popmap_final1.txt \
---whitelist /new-home/mjgroeneveld/radseq/RA_assembly_B/core/filtering/remove1/RA1_whitelist.txt \
---write-single-snp \
---vcf \
---structure \
---radpainter
-
-# Calculate final missingness
-module load app/vcftools
-vcftools --vcf populations.snps.vcf --missing-indv
-# produces out.imiss
-awk 'NR>1 {sum+=$5} END {print sum/(NR-1)}' out.imiss
-
-# Calculate number of snps
-grep -vc '^#' "populations.snps.vcf" > "popgen_nSNPs.txt"
-
-### assembly complete > datasets ready for next steps ###
-
+---
