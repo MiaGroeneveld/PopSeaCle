@@ -6,7 +6,7 @@ Everything is run in R from one script, [`scripts/03_RA_population_genomics.R`](
 
 ## Populations
 
-MZ (Mozambique, n = 28), TZ (Tanzania, 8), MD (Madagascar, 2), RI (Réunion Island, 9), SY (Seychelles, 12), MA (Malaysia, 10), AU (Australia, 2). Madagascar and Australia are excluded from population-level diversity statistics and the site frequency spectra because of their small sample sizes.
+MZ (Mozambique, n = 28), TZ (Tanzania, 8), MD (Madagascar, 2), RI (Réunion Island, 9), SY (Seychelles, 12), MA (Malaysia, 10), AU (Australia, 2). Madagascar and Australia are excluded from population-level diversity statistics and the site frequency spectra (SFS) because of their small sample sizes. SFS excluded in the manuscript.
 
 ## Sections
 
@@ -26,7 +26,7 @@ MZ (Mozambique, n = 28), TZ (Tanzania, 8), MD (Madagascar, 2), RI (Réunion Isla
 
 ### Isolation by distance and environment (section 9)
 
-Linearised pairwise FST (FST / (1 - FST)) was the response. Geographic distances are marine least-cost distances averaged to the population level, and environmental distances are Bray-Curtis, Manhattan or Canberra dissimilarities of the population mean values of the four environmental variables retained in the RDA (standardised), with the metric chosen by AIC (Canberra for three of the four datasets, so Canberra is used throughout). Three models (IBD only, IBE only, combined) were fitted with `gls()` from `nlme` by maximum likelihood, without a correlation structure, to obtain AIC values for comparison. Significance of IBD and IBE was assessed with 10,000 permutations of the pairwise genetic values, with R² taken from the observed correlation. Pairwise comparisons share populations, so the p-values and AIC comparisons are indicative.
+Linearised pairwise FST (FST / (1 - FST)) was the response. Geographic distances are marine least-cost distances averaged to the population level, and environmental distances are Bray-Curtis, Manhattan or Canberra dissimilarities of the population mean values of the four environmental variables retained in the RDA (standardised), with the metric chosen by AIC (Canberra for three of the four datasets, so Canberra is used throughout). Three models (IBD only, IBE only, combined) were fitted with `gls()` from `nlme` by maximum likelihood, without a correlation structure, to obtain AIC values for comparison. Significance of IBD and IBE was assessed with 10 000 permutations of the pairwise genetic values, with R² taken from the observed correlation. Pairwise comparisons share populations, so the p-values and AIC comparisons are indicative.
 
 ## Input
 
