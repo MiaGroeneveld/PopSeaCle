@@ -8,7 +8,7 @@ The analysis is one R script, [`scripts/02_RA_seascape_outliers.R`](../scripts/0
 
 | File | Contents |
 |---|---|
-| `RApop_set1.snps.vcf` | RA_set1: 71 individuals, 27,562 SNPs (output of [stage 1](01_assembly_and_filtering.md)) |
+| `RApop_set1.snps.vcf` | RA_set1: 71 individuals, 27 562 SNPs (output of [stage 1](01_assembly_and_filtering.md)) |
 | `RApopmap.txt` | two columns: individual ID, population code |
 | `RA_coordinates.csv` | ID, latitude, longitude (see note on Réunion Island below) |
 
@@ -62,8 +62,8 @@ Section 11 builds four SNP sets from the three outlier methods (pcadapt, RDA, LF
 
 | Dataset | Definition | SNPs |
 |---|---|---|
-| Neutral | all SNPs not detected by any method | 24,415 |
-| Adaptive | detected by any of the three methods | 3,147 |
+| Neutral | all SNPs not detected by any method | 24 415 |
+| Adaptive | detected by any of the three methods | 3 147 |
 | High confidence | detected by two or more methods | 720 |
 | Environmental | RDA outliers | 846 |
 
