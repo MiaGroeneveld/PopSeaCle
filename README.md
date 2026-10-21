@@ -11,7 +11,7 @@ Scripts and workflow notes for the RADseq analyses of the whitespotted wedgefish
 |---|---|---|---|
 | 1 | Raw data QC, demultiplexing, de novo assembly (Stacks), filtering | HPC, with some checks in R | [`docs/01_assembly_and_filtering.md`](docs/01_assembly_and_filtering.md) |
 | 2 | *R. australiae*: environmental data, variable selection, partial RDA, outlier detection, four-dataset preparation | R, with ordistep and partial RDA on HPC | [`docs/02_RA_seascape_outliers.md`](docs/02_RA_seascape_outliers.md), [`scripts/02_RA_seascape_outliers.R`](scripts/02_RA_seascape_outliers.R) |
-| 3 | *R. australiae*: population genomics (diversity, FST, DAPC, sNMF, SFS, IBD/IBE) | R | [`docs/03_RA_population_genomics.md`](docs/03_RA_population_genomics.md), [`scripts/03_RA_population_genomics.R`](scripts/03_RA_population_genomics.R) |
+| 3 | *R. australiae*: population genomics (diversity, FST, DAPC, sNMF, IBD/IBE) | R | [`docs/03_RA_population_genomics.md`](docs/03_RA_population_genomics.md), [`scripts/03_RA_population_genomics.R`](scripts/03_RA_population_genomics.R) |
 | 4 | *R. djiddensis*: population genomics | R | to be added |
 | 5 | *R. djiddensis*: hybridisation analyses | R | to be added |
 | 6 | *R. djiddensis*: multiple paternity and twinning | R, with simulations on HPC | to be added |
