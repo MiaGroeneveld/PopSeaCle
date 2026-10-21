@@ -1,7 +1,7 @@
 # PopSeaCle
-**Pop**ulation and **sea**scape genetics **c**ol**le**ction - *Rhynchobatus* 3RADseq data analysis
+**Pop**ulation and **sea**scape genetics **c**ol**le**ction
 
-Scripts and workflow notes for the RADseq analyses of the whitespotted wedgefish (*Rhynchobatus djiddensis*) and the bottlenose wedgefish (*R. australiae*) in the Western Indian Ocean and Indo-West Pacific.
+Scripts and workflow notes for the 3RADseq analyses of the whitespotted wedgefish (*Rhynchobatus djiddensis*) and the bottlenose wedgefish (*R. australiae*) in the Western Indian Ocean and Indo-West Pacific.
 
 > Companion code for [citation to be added on publication].
 
