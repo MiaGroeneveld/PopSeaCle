@@ -8,10 +8,10 @@ Steps marked **[HPC]** were run on a cluster and **[R]** in R. Software: FastQC 
 
 | Dataset | Species | SNPs | n | Missingness | Filters | Use |
 |---|---|---|---|---|---|---|
-| RD_set1 | *R. djiddensis* | 27,366 | 47 | 4.83% | MAC >= 3, FS1 | primary |
-| RD_set2 | *R. djiddensis* | 18,942 | 47 | 5.09% | MAC >= 3, FS2 | robustness |
-| RA_set1 | *R. australiae* | 27,562 | 71 | 6.32% | MAC >= 3, FS1 | primary |
-| RA_set2 | *R. australiae* | 30,380 | 71 | 6.24% | MAC >= 2, FS1 | robustness |
+| RD_set1 | *R. djiddensis* | 27 366 | 47 | 4.83% | MAC >= 3, FS1 | primary |
+| RD_set2 | *R. djiddensis* | 18 942 | 47 | 5.09% | MAC >= 3, FS2 | robustness |
+| RA_set1 | *R. australiae* | 27 562 | 71 | 6.32% | MAC >= 3, FS1 | primary |
+| RA_set2 | *R. australiae* | 30 380 | 71 | 6.24% | MAC >= 2, FS1 | robustness |
 
 ## Settings
 
@@ -127,7 +127,7 @@ vcftools --vcf populations.snps.vcf --minGQ 20 --minDP 5 --max-missing 0.8 \
 
 ### 5.3 Remove replicates, high-missingness individuals and outliers [HPC, then R]
 
-Technical replicates (keeping the replicate with the lowest missingness), individuals with more than 40% missing data and outliers identified in a preliminary PCA in R were removed.
+Replicates (keeping the replicate with the lowest missingness), individuals with more than 40% missing data and outliers identified in a preliminary PCA in R were removed.
 
 ```bash
 vcftools --vcf FS1_GQ20_DP5_MISS0.8.recode.vcf --remove remove_list.txt \
@@ -136,7 +136,7 @@ vcftools --vcf FS1_GQ20_DP5_MISS0.8.recode.vcf --remove remove_list.txt \
 
 ### 5.4 Final dataset [HPC]
 
-The Stacks locus IDs of the filtered SNPs were extracted from the CHROM column of the filtered VCF as a whitelist, and `populations` was rerun on the original assembly to keep one SNP per locus and write the VCF and other formats. The whitelist must contain only the locus IDs, one per line. A two-column whitelist (locus and position) is read incorrectly by Stacks and matched only 34 SNPs.
+The Stacks locus IDs of the filtered SNPs were extracted from the CHROM column of the filtered VCF as a whitelist, and `populations` was rerun on the original assembly to keep one SNP per locus and write the VCF and other formats. The whitelist must contain only the locus IDs, one per line.
 
 ```bash
 grep -v '^#' FS1_filtered.recode.vcf | cut -f1 | sort -n | uniq > whitelist.txt
