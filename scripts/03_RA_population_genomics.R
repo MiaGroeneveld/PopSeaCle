@@ -123,8 +123,6 @@ cat("\nDone\n")
 # ======================================================================
 
 # Madagascar (n = 2) and Australia (n = 2) are excluded from population-level diversity
-# TODO(verify): this subsetting is taken from the earlier allelic richness block; check that
-# the genind object used in your final run contained only these five populations
 pops_for_div <- c("MZ","TZ","RI","SY","MA")
 gind_div <- gind_full[which(as.character(pop(gind_full)) %in% pops_for_div), ]
 pop(gind_div) <- factor(as.character(pop(gind_div)), levels = pops_for_div)
@@ -188,8 +186,6 @@ cat("\nDone.\n")
 # 2b. Weighted means of HO, HE, FIS and AR across the five populations (weights = sample size)
 # sum(n_i * statistic_i) / sum(n_i), with n = 67 (MD and AU excluded)
 # Private alleles are not averaged; per-population counts are in RA_set1_AR_PA_all_datasets.csv
-# TODO(verify): this reproduces the weighted means you calculated in Excel; check it
-# matches your table
 # ======================================================================
 
 wm <- do.call(rbind, lapply(names(dataset_list), function(ds) {
@@ -1445,7 +1441,7 @@ diag(geo_dist_pop) <- 0
 # pop_coords <- pop_coords[match(pop_levels, pop_coords$pop),]
 # rownames(pop_coords) <- pop_coords$pop
 
-gc_dist <- marine_dist   # TODO(verify): gc_dist is not created in the uploaded scripts; it should be the marine least-cost distance matrix from stage 2
+gc_dist <- marine_dist
 # Average gc_dist within population pairs
 pops_all <- pop_levels
 n_pops   <- length(pops_all)
