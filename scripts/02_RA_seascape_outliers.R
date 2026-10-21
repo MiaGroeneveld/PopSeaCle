@@ -19,9 +19,6 @@ library(readxl)     # Excel file loading (not needed if all CSV)
 VCF_FILE      <- "RApop_set1.snps.vcf"  # set1: MAC>=3, n=71, 27,562 SNPs
 POPMAP_FILE   <- "RApopmap.txt"          # two-column: ID pop
 COORDS_FILE   <- "RA_coordinates.csv"    # comma-delimited: ID, lat, lon
-                                          # Réunion Island coordinates manually
-                                          # corrected to nearest offshore cell
-                                          # (n=4) and bathymetry -8m (n=2)
 N_IND         <- 71       # total individuals
 N_SNP         <- 27562    # total SNPs
 K_PCADAPT     <- 4        # optimal K from scree plot + GIF inspection
@@ -76,8 +73,7 @@ popmap$pop <- factor(popmap$pop, levels = POP_ORDER)
 cat("Popmap loaded:", nrow(popmap), "individuals\n")
 cat("Populations:", levels(popmap$pop), "\n")
 cat("Population sizes:\n"); print(table(popmap$pop))
-# Expected: TZ=8, MD=2, SY=12, AU=2 (note: AU n=2 excluded from
-# population-level diversity stats — too small), RI=9, MZ=28, MA=10
+# Expected: TZ=8, MD=2, SY=12, AU=2, RI=9, MZ=28, MA=10
 # Total = 71 ✓
 
 stopifnot(nrow(popmap) == N_IND)
@@ -85,12 +81,6 @@ cat("Popmap n check passed ✓\n")
 
 # ── 1.2 Coordinates ───────────────────────────────────────────────────────────
 # Comma-delimited CSV: ID, lat, lon
-# Réunion Island coordinates manually corrected:
-#   - n=4 individuals: adjusted to nearest available offshore ocean cell
-#     due to land masking at Bio-ORACLE v3 raster resolution
-#   - n=2 individuals: bathymetry manually assigned -8m (mean shallow
-#     coastal depth) as automated extraction returned anomalous values
-#     due to steep volcanic submarine slopes
 coords <- read.csv(COORDS_FILE,
                    header           = TRUE,
                    sep              = ",",
@@ -324,7 +314,7 @@ cat("Section 2 complete — OutFLANK results saved\n")
 # Structure-based individual-level outlier detection
 # K=4 selected: lowest GIF=1.286, corroborated by scree plot
 # Threshold: Storey q-value < 0.05 (Storey & Tibshirani 2003)
-# Result: 1,270 outliers (4.6% of 27,562 SNPs)
+# Result: 1 270 outliers (4.6% of 27 562 SNPs)
 # ============================================================
 
 # ── Using objects from Section 1 ──────────────────────────────────────────────
@@ -424,7 +414,7 @@ cat("pcadapt outliers (q <", FDR_PCADAPT, "):",
     length(outliers_pcadapt_names), "\n")
 cat("Percentage:",
     round(length(outliers_pcadapt_names)/N_SNP*100, 1), "%\n")
-# Expected: 1,270 outliers (4.6%)
+# Expected: 1 270 outliers (4.6%)
 
 # ── Manhattan plot with FDR threshold line ────────────────────────────────────
 # fdr_line = -log10 of maximum p-value among q<0.05 outliers
@@ -1025,7 +1015,7 @@ cat("Section 8 complete\n")
 # using 3 SD threshold on each significant RDA axis
 # Applied to RDA1, RDA2, RDA3 only (RDA4 p=0.359 excluded)
 # Reference: Forester et al. 2018
-# Result: 846 outliers (3.1% of 27,562 SNPs)
+# Result: 846 outliers (3.1% of 27 562 SNPs)
 # ============================================================
 
 library(vegan)
