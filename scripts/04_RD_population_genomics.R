@@ -1,6 +1,6 @@
 # ============================================================
 # RD set1 — Population Genomics Pipeline
-# Species: Rhynchobatus djiddensis (RD set1: 47 individuals, 27,366 SNPs)
+# Species: Rhynchobatus djiddensis (RD set1: 47 individuals, 27 366 SNPs)
 # Populations: SA (SB + ZK + DU), MO, AR (Arabian region:
 #   Arabian Gulf + Strait of Hormuz + Arabian Sea; n=1–2 per
 #   sub-location; merged due to insufficient per-site n)
@@ -961,14 +961,14 @@ cat("Heatmap saved\n")
 #                  repos = NULL, type = "source")
 #
 # Workflow (see docs/04_RD_population_genomics.md)
-#   1. On the cluster: remove the Arabian region (RS) individuals and draw a random subset of 5,000 SNPs
-#      (vcftools); download RD_set1_noRS.recode.vcf (full dataset, 27,366 SNPs, for relative migration) and
+#   1. On the cluster: remove the Arabian region (RS) individuals and draw a random subset of 5 000 SNPs
+#      (vcftools); download RD_set1_noRS.recode.vcf (full dataset, 27 366 SNPs, for relative migration) and
 #      RD_set1_noRS_5000.recode.vcf (subset, for significance testing and the network plot)
 #   2. Convert each VCF to GENEPOP on Galaxy Europe (usegalaxy.eu): genepop.txt (full) and genepop_5000.txt
 #   3. Restructure both files in R (below), because Galaxy puts every individual in a single Pop section
 #   4. Relative migration on the full dataset in R, without bootstraps (bootstrapping fails silently)
-#   5. Significance (500 bootstraps, alpha = 0.05) on the 5,000-SNP subset in the divMigrate online application
-#   6. Network plot in R from the 5,000-SNP subset
+#   5. Significance (500 bootstraps, alpha = 0.05) on the 5 000-SNP subset in the divMigrate online application
+#   6. Network plot in R from the 5 000-SNP subset
 
 library(diveRsity)
 library(Cairo)
