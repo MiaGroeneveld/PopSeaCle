@@ -580,7 +580,6 @@ library(parallelnewhybrid)
 path.data <- "path/to/newhybrids_data/"
 path.NH   <- "path/to/newhybrids/"
 
-# Full dataset (no subsetting). NOTE: this run produced floating-point underflow and was not used;
 # NewHybrids was run on the 200-locus subsets above.
 locus_names_full <- paste(fix_final[, 1], fix_final[, 2], sep = "_")
 
