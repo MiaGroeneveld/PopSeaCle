@@ -2,7 +2,7 @@
 
 Processing of 3RADseq data for the whitespotted wedgefish (*Rhynchobatus djiddensis*, RD) and the bottlenose wedgefish (*R. australiae*, RA). Both species were sequenced on one NovaSeq S4 run (paired-end, 2 x 150 bp). The pipeline is the same for both, so it is shown once with `SPECIES` as a variable; differences are listed at the end.
 
-Steps marked **[HPC]** were run on a cluster and **[R]** in R. Software: FastQC 0.11.5, Cutadapt 1.9.1, Stacks 2.59, VCFtools 0.1.14, RADstackshelpR 0.1.0.
+Steps marked **[HPC]** were run on a cluster and **[R]** in R. Software: FastQC 0.11.5, Cutadapt 1.9.1, Stacks 2.59, VCFtools 0.1.15, RADstackshelpR 0.1.0.
 
 ## Final datasets
 
