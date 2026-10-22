@@ -1,7 +1,7 @@
 # ============================================================
 # RD marine distances (input to the isolation by distance analysis in 04_RD_population_genomics.R)
-# Species: Rhynchobatus djiddensis (RD set1: 47 individuals, 27,366 SNPs)
-# Marine least-cost distances between individuals with marineDistances (Klein et al. 2024),
+# Species: Rhynchobatus djiddensis (RD set1: 47 individuals, 27 366 SNPs)
+# Marine least-cost distances between individuals with marineDistances,
 # averaged to the population level; same procedure as for R. australiae (stage 2, section 5)
 # ============================================================
 
