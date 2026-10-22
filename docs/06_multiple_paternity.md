@@ -57,7 +57,7 @@ populations --in-path $ASSEMBLY --out-path $FAMILY_OUT --popmap family_individua
 
 ### COLONY
 
-COLONY (full-likelihood method) is run in its graphical interface with the input files written by the script: female and male polygamy, dioecious, diploid, without inbreeding and without clones, medium run length, 5 runs, random seed 1234, no sibship prior, sibship scaling, allele frequencies estimated during the analysis (not updated), genotype error rate 0.01, allelic dropout 0, mother SC12 as the known female with probability 1, and all pups as a known maternal sibship (following Nevatte et al. 2023). COLONY uses the informative loci in the STRUCTURE file, and the number it used is reported in its output. A second run excludes SC3.
+COLONY (full-likelihood method) is run in its graphical interface with the input files written by the script: female and male polygamy, dioecious, diploid, without inbreeding and without clones, medium run length, 5 runs, random seed 1234, no sibship prior, sibship scaling, allele frequencies estimated during the analysis (not updated), genotype error rate 0.01, allelic dropout 0, mother SC12 as the known female with probability 1, and all pups as a known maternal sibship. A second run excludes SC3.
 
 ### Relatedness simulation
 
