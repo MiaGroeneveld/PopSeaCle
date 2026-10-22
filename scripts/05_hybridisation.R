@@ -125,9 +125,9 @@ cat("noMO3 PCA saved\n")
 
 cat("\nDone. Final figures:\n")
 cat("  hyb_PCA_withMO3_final.pdf   — publication figure (no labels)\n")
-cat("  hyb_PCA_withMO3_labelled.pdf — for your reference\n")
+cat("  hyb_PCA_withMO3_labelled.pdf — for reference\n")
 cat("  hyb_PCA_noMO3_final.pdf     — species separation (no labels)\n")
-cat("  hyb_PCA_noMO3_labelled.pdf  — for your reference\n")
+cat("  hyb_PCA_noMO3_labelled.pdf  — for reference\n")
 
 
 # =============================================================================
@@ -256,9 +256,9 @@ library(pophelper)  # for consistent sNMF bar plots with the main analyses
 
 ## setwd("path/to/working/directory")
 
-# Population colours — consistent with your main datasets
-col_RA <- "#F5A623"   # update to match your RA colour
-col_RD <- "#2166AC"   # update to match your RD colour
+# Population colours — consistent with main datasets
+col_RA <- "#F5A623"   # update to match RA colour
+col_RD <- "#2166AC"   # update to match RD colour
 
 # Load final diagnostic dataset
 dat <- readRDS("hyb_diagnostic_dataset.rds")
@@ -621,7 +621,7 @@ rd_inds      <- c("RS1","RS3","RS5","RS6","RS7","RS9","RS10","RS11","RS12","RS13
 rl_inds      <- c("RS4","RS8","RS10")
 
 # withRS2 dataset — RS2 treated as "Unknown" for PCA/sNMF
-# Population colours — consistent with your combined assembly plots
+# Population colours — consistent with combined assembly plots
 col_RD      <- "#2166AC"   # blue — R. djiddensis
 col_RL      <- "#1B7837"   # green — R. laevis (cryptic)
 col_RS2     <- "#7B2D8B"   # purple — RS2 putative intermediate
