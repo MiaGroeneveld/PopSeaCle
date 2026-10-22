@@ -11,10 +11,10 @@ Each dataset has a version with and without the putative hybrid. The versions wi
 
 | Dataset | Individuals | SNPs | File |
 |---|---|---|---|
-| Mozambique, without MO3 | 35 (RA 28, RD 7) | 36612 | `hyb_noMO3.vcf` |
-| Mozambique, with MO3 | 36 (RA 28, RD 8) | 36317 | `hyb_withMO3.vcf` |
-| Arabian region, without RS2 | 13 (RD 10, RL 3) | 40089 | `rs_noRS2.vcf` |
-| Arabian region, with RS2 | 14 (RD 11, RL 3) | 39551 | `rs_withRS2.vcf` |
+| Mozambique, without MO3 | 35 (RA 28, RD 7) | 36 612 | `hyb_noMO3.vcf` |
+| Mozambique, with MO3 | 36 (RA 28, RD 8) | 36 317 | `hyb_withMO3.vcf` |
+| Arabian region, without RS2 | 13 (RD 10, RL 3) | 40 089 | `rs_noRS2.vcf` |
+| Arabian region, with RS2 | 14 (RD 11, RL 3) | 39 551 | `rs_withRS2.vcf` |
 
 ## Cluster steps
 
@@ -42,12 +42,12 @@ populations --in-path $ASSEMBLY --out-path $FINAL --popmap $POPMAP \
 
 | Step | What it does | Main settings |
 |---|---|---|
-| PCA | with and without the putative hybrid | `pcadapt`, K = 2 |
+| PCA | of each dataset including the putative hybrid (the script also draws the version without it, as a species-separation check) | `pcadapt`, K = 2 |
 | Diagnostic loci | per-locus FST between the two parental species in the dataset without the putative hybrid; loci with FST = 1 are kept (FST > 0.9 if there are fewer than 200); the loci are then found in the dataset with the putative hybrid, and loci with any missing genotype are removed | `hierfstat::basic.stats` |
 | sNMF | ancestry coefficients on the diagnostic loci | `LEA`; K = 1 to 5 (Mozambique) or 1 to 4 (Arabian region), 100 repetitions, seed 123; K = 2 |
 | NewHybrids | random subsets of 200 diagnostic loci for three seeds (123, 456, 789), run with burn-in 10000 and 100000 sweeps | `parallelnewhybrid::parallelnh_WIN` |
 
-NewHybrids runs outside R. It uses the Windows executable (the `newhybrids` program) through the `parallelnewhybrid` package, with one folder per run. A run on all of the Mozambique diagnostic loci produced numerical underflow and was not used. For the Arabian region, NewHybrids did not converge because only three *R. laevis* reference individuals are available, so RS2 is classified from the PCA, the sNMF ancestry coefficients and its heterozygosity at the diagnostic loci. Heterozygosity is the number of heterozygous genotypes among the 200 loci of each subset (`het_MO3` and `het_RS2` in the script).
+NewHybrids runs outside R. It uses the Windows executable (the `newhybrids` program) through the `parallelnewhybrid` package, with one folder per run. NewHybrids is meant for about 200 loci, so random 200-locus subsets were used instead. For the Arabian region, NewHybrids did not converge because only three *R. laevis* reference individuals are available, so RS2 is classified from the PCA, the sNMF ancestry coefficients and its heterozygosity at the diagnostic loci. Heterozygosity is the number of heterozygous genotypes among the 200 loci of each subset (`het_MO3` and `het_RS2` in the script).
 
 ## Input
 
