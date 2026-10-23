@@ -49,9 +49,9 @@ process_radtags \
   --renz_1 mspI --renz_2 bamHI
 ```
 
-## Step 3. Parameter optimisation (RADstackshelpR) [HPC, then R] - see scripts/01_mMn_optimisation.R
+## Step 3. Parameter optimisation (RADstackshelpR) [HPC, then R]
 
-Twenty samples were used (about equal numbers per locality, close to average read depth), with remainder reads (`*.rem.*.fq.gz`) moved out of the directory. Each parameter was varied in turn (m = 3 to 7, M = 1 to 8, n = M-1, M and M+1) and the results visualised in R. The optimal values were **m = 3, M = 3, n = 4**.
+Twenty samples were used (about equal numbers per locality, close to average read depth), with remainder reads (`*.rem.*.fq.gz`) moved out of the directory. Each parameter was varied in turn (m = 3 to 7, M = 1 to 8, n = M-1, M and M+1) and the results visualised in R. See **scripts/01_mMn_optimisation.R** - the optimal values were **m = 3, M = 3, n = 4**.
 
 ```bash
 OPTIM=$WORKDIR/${SPECIES}_assembly/optim
