@@ -49,7 +49,7 @@ process_radtags \
   --renz_1 mspI --renz_2 bamHI
 ```
 
-## Step 3. Parameter optimisation (RADstackshelpR) [HPC, then R]
+## Step 3. Parameter optimisation (RADstackshelpR) [HPC, then R] - see scripts/01_mMn_optimisation.R
 
 Twenty samples were used (about equal numbers per locality, close to average read depth), with remainder reads (`*.rem.*.fq.gz`) moved out of the directory. Each parameter was varied in turn (m = 3 to 7, M = 1 to 8, n = M-1, M and M+1) and the results visualised in R. The optimal values were **m = 3, M = 3, n = 4**.
 
@@ -100,7 +100,7 @@ stacks-dist-extract gstacks.log.distribs effective_coverages_per_sample | grep -
 
 ### 5.1 Base filter with `populations` [HPC]
 
-All individuals were treated as one population. Loci had to be present in at least 80% of samples, with maximum observed heterozygosity 0.5 and a minor allele count of at least 3 (R80/Het50/MAC3). Additional combinations tested for RA (R60_Het50_MAC3/ R80_Het50_MAC2).
+All individuals were treated as one population. Loci had to be present in at least 80% of samples, with maximum observed heterozygosity 0.5 and a minor allele count of at least 3 (R80/Het50/MAC3). Additional base combinations tested for RA (R60_Het50_MAC3/ R80_Het50_MAC2).
 
 ```bash
 populations --in-path $OUT --out-path $CORE/filtering/base_R80_Het50_MAC3/ \
