@@ -1,4 +1,4 @@
-# radstackshelpr_visualisation
+# radstackshelpr_visualisation (DeRaad, 2021)
 library(RADstackshelpR)
 
 # optimize_m function will generate summary stats on iterative runs
