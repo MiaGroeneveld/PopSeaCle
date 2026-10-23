@@ -22,11 +22,11 @@ Individuals were grouped as SA (South Africa: Sodwana Bay SB, Zinkwazi ZK and Du
 
 ### Isolation by distance (section 6)
 
-Linearised pairwise FST (FST / (1 - FST)) is the response and marine least-cost distance, averaged to the population level, is the predictor. The model is fitted with `gls()` from `nlme` by maximum likelihood, and significance comes from 10,000 permutations of the pairwise genetic values, with R² taken from the observed correlation.
+Linearised pairwise FST (FST / (1 - FST)) is the response and marine least-cost distance, averaged to the population level, is the predictor. The model is fitted with `gls()` from `nlme` by maximum likelihood, and significance comes from 10 000 permutations of the pairwise genetic values, with R² taken from the observed correlation.
 
 ### divMigrate (section 7)
 
-Directional relative migration (Jost's D, GST and Nm; Sundqvist et al. 2016) among the South African and Mozambican sites (SB, ZK, DU, MO; the Arabian region is excluded) was estimated with `diveRsity` v1.9.90 (Keenan et al. 2013), as in Manuzzi et al. (2019). Bootstrapping fails in this version of the package, so the analysis is split in two:
+Directional relative migration (Jost's D, GST and Nm) among the South African and Mozambican sites (SB, ZK, DU, MO; the Arabian region is excluded) was estimated with `diveRsity` v1.9.90. Bootstrapping fails in this version of the package, so the analysis is split in two:
 
 1. **On the cluster:** the Arabian region individuals are removed, and a random subset of 5 000 SNPs is drawn.
 
