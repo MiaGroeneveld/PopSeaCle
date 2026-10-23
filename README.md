@@ -9,7 +9,7 @@ Scripts and workflow notes for the 3RADseq analyses of the whitespotted wedgefis
 
 | Stage | Contents | Where it runs | Document |
 |---|---|---|---|
-| 1 | Raw data QC, demultiplexing, de novo assembly (Stacks), filtering | HPC, with some checks in R | [`docs/01_assembly_and_filtering.md`](docs/01_assembly_and_filtering.md), [`scripts/01_mMn_optimisation.R`](scripts/01_mMn_optimisation.R |
+| 1 | Raw data QC, demultiplexing, de novo assembly (Stacks), filtering | HPC, with some checks in R | [`docs/01_assembly_and_filtering.md`](docs/01_assembly_and_filtering.md), [`scripts/01_mMn_optimisation.R`](scripts/01_mMn_optimisation.R) |
 | 2 | *R. australiae*: environmental data, variable selection, partial RDA, outlier detection, four-dataset preparation | R, with ordistep and partial RDA on HPC | [`docs/02_RA_seascape_outliers.md`](docs/02_RA_seascape_outliers.md), [`scripts/02_RA_seascape_outliers.R`](scripts/02_RA_seascape_outliers.R) |
 | 3 | *R. australiae*: population genomics (diversity, FST, DAPC, sNMF, IBD/IBE) | R | [`docs/03_RA_population_genomics.md`](docs/03_RA_population_genomics.md), [`scripts/03_RA_population_genomics.R`](scripts/03_RA_population_genomics.R) |
 | 4 | *R. djiddensis*: population genomics (FST, DAPC, sNMF, diversity, IBD, divMigrate) | R | [`docs/04_RD_population_genomics.md`](docs/04_RD_population_genomics.md), [`scripts/04_RD_population_genomics.R`](scripts/04_RD_population_genomics.R), [`scripts/04a_RD_spatial_data.R`](scripts/04a_RD_spatial_data.R) |
