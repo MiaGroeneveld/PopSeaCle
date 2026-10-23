@@ -19,7 +19,7 @@ populations --in-path $ASSEMBLY --out-path $OUT --popmap combined_popmap.txt \
 vcftools --vcf $OUT/populations.snps.vcf --minGQ 20 --minDP 5 --max-missing 1 \
   --recode --recode-INFO-all --out MP_combined_GQ20_DP5_MISS1.0
 
-# remove a PD1 (48 to 47 individuals)
+# remove PD1 (48 to 47 individuals)
 vcftools --vcf MP_combined_GQ20_DP5_MISS1.0.recode.vcf --remove-indv PD1 \
   --recode --recode-INFO-all --out MP_combined_noPD1
 
