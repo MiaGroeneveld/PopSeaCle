@@ -47,13 +47,13 @@ populations --in-path $ASSEMBLY --out-path $FAMILY_OUT --popmap family_individua
 
 ## Sections of `06_multiple_paternity.R`
 
-| Section | What it does | Main settings |
-|---|---|---|
-| COLONY input | reads the STRUCTURE file (`skip = 2` for the two header lines of the Stacks output), and writes the offspring genotypes, the mother genotype, the marker file with the error rate and the known maternal sibship, with and without SC3 | genotype error rate 0.01, allelic dropout 0 |
-| Kinship heatmaps | pairwise genetic distance (`adegenet::bitwise.dist`, pup-subset) and KING-robust kinship (`SNPRelate::snpgdsIBDKING` - which is calculated in R on all 47 individuals, so that the reference panel contributes to the allele frequencies, and then subset to the pups) | `MP_heatmaps_combined.pdf/png` |
-| Relatedness | plots of the empirical LynchRD, TrioML and DyadML estimates from the cluster, with the simulated distributions | |
-| PISibs | probability of identity for siblings (Waits et al. 2001), per locus and cumulative, for the family individuals | |
-| IBD | `SNPRelate` method of moments (`snpgdsIBDMoM`) and maximum likelihood (`snpgdsIBDMLE`) for SC1 to SC12 | `SC1_to_SC12_IBD_matrix.csv`, `SC1_to_SC12_IBD_MLE_results.csv` |
+| Section | What it does |
+|---|---|
+| COLONY input | reads the STRUCTURE file (`skip = 2` for the two header lines of the Stacks output) and writes the offspring genotypes, the mother genotype, the marker file and the known maternal sibship, with and without SC3 |
+| Kinship heatmaps | genetic distance among the pups (`adegenet::bitwise.dist`) and KING-robust kinship (`SNPRelate::snpgdsIBDKING`), calculated on all 47 individuals so that the reference panel contributes to the allele frequencies and then subset to the pups; saved as `MP_heatmaps_combined.pdf/png` |
+| Relatedness | plots of the empirical LynchRD, TrioML and DyadML estimates from the cluster, with the simulated distributions |
+| PISibs | probability of identity for siblings (Waits et al. 2001), per locus and cumulative, for the family individuals |
+| IBD | `SNPRelate` method of moments (`snpgdsIBDMoM`) and maximum likelihood (`snpgdsIBDMLE`) for SC1 to SC12; saved as `SC1_to_SC12_IBD_matrix.csv` and `SC1_to_SC12_IBD_MLE_results.csv` |
 
 ### COLONY
 
