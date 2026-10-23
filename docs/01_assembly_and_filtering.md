@@ -100,7 +100,7 @@ stacks-dist-extract gstacks.log.distribs effective_coverages_per_sample | grep -
 
 ### 5.1 Base filter with `populations` [HPC]
 
-All individuals were treated as one population. Loci had to be present in at least 80% of samples, with maximum observed heterozygosity 0.5 and a minor allele count of at least 3 (R80/Het50/MAC3). For RA_set2 the minor allele count was 2.
+All individuals were treated as one population. Loci had to be present in at least 80% of samples, with maximum observed heterozygosity 0.5 and a minor allele count of at least 3 (R80/Het50/MAC3). Additional combinations tested for RA (R60_Het50_MAC3/ R80_Het50_MAC2).
 
 ```bash
 populations --in-path $OUT --out-path $CORE/filtering/base_R80_Het50_MAC3/ \
@@ -110,7 +110,7 @@ populations --in-path $OUT --out-path $CORE/filtering/base_R80_Het50_MAC3/ \
 
 ### 5.2 Genotype filters with VCFtools [HPC, then R]
 
-Four filter sets were compared in R, and the one with the best balance of missingness and SNP retention (FS1) was used for the primary datasets. FS2 was used for the RD robustness dataset.
+Four filter sets were compared in R, and the one with the best balance of missingness and SNP retention (FS1) was used for the primary datasets.
 
 | Set | min GQ | min DP | max missing |
 |---|---|---|---|
