@@ -152,7 +152,7 @@ cat("Female genotype file written: FemaleGenotype.txt\n")
 # =============================================================================
 # Step 6: Write marker types file
 # COLONY format: 4 lines, all values space-separated
-#   Line 1: Locus names (L1 L2 ... L1923)
+#   Line 1: Locus names (L1 L2 ... Ln, where n is the number of loci in the STRUCTURE file)
 #   Line 2: Marker types (0 = codominant for all)
 #   Line 3: Allelic dropout rates (0 for all)
 #   Line 4: Other error rates (0.01 for all, following Nevatte et al.)
@@ -233,7 +233,7 @@ cat("KnownMaternalSibs_noSC3.txt written\n")
 #    - Sibship Prior: No Prior
 #
 # 3. MARKERS TAB:
-#    - Number of Loci: 1923
+#    - Number of Loci: n (the "Loci:" value printed above)
 #    - Click Load -> select MarkerTypeErrorRate.txt
 #    - Allele Frequency: Unknown
 #    - Click Check Data -> OK
@@ -259,7 +259,7 @@ cat("KnownMaternalSibs_noSC3.txt written\n")
 #    - Number: 1 (one maternal sibship group = all pups share SC12)
 #    - Maternity Exc Threshold: 50
 #      (allows up to 50 mismatches between mother-offspring dyads;
-#       with 1923 loci at 0.01 error rate, expect ~19 mismatches by chance)
+#       with n loci at 0.01 error rate, expect about n x 0.01 mismatches by chance)
 #    - Click Load -> select KnownMaternalSibs.txt
 #    - Click Check Data -> OK
 #
@@ -328,6 +328,7 @@ bit_comb     <- as.matrix(bitwise.dist(gl_pups_comb, percent = TRUE,
 bit_comb     <- bit_comb[pup_order, pup_order]
 
 # ── KING kinship — all individuals, subset to pups ───────────
+# GDS file (SNPRelate format) created from the VCF; MP_combined.vcf is MP_combined_noPD1.recode.vcf renamed
 snpgdsVCF2GDS("MP_combined.vcf", "MP_combined_noPD1.gds",
                method = "biallelic.only", verbose = FALSE)
 gds_comb     <- snpgdsOpen("MP_combined_noPD1.gds")
@@ -604,7 +605,7 @@ library(SNPRelate)
 
 # Define the VCF file and the GDS file to create
 vcf_input <- "MP_combined.vcf"        
-gds_output <- "temporary_data.gds"    # R will create this file from scratch right now
+gds_output <- "temporary_data.gds"    # GDS file created from the VCF below
 
 # 3. This step automatically creates the GDS file for you
 snpgdsVCF2GDS(vcf_input, gds_output, method = "biallelic.only")
@@ -612,7 +613,7 @@ snpgdsVCF2GDS(vcf_input, gds_output, method = "biallelic.only")
 # 4. Open the file that R just built
 genofile <- snpgdsOpen(gds_output)
 
-# 5. Prune for Linkage Disequilibrium (highly recommended for VCF data)
+# 5. Prune for Linkage Disequilibrium (didn't change anything)
 set.seed(123) 
 ld_pruned <- snpgdsLDpruning(genofile, ld.threshold = 0.2, autosome.only = TRUE)
 snp_ids <- unlist(ld_pruned)
