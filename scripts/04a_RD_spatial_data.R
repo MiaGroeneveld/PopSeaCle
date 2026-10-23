@@ -97,7 +97,7 @@ cat("Session objects saved\n")
 
 # ============================================================
 # RD Seascape Genomics — Step 3: Marine distances + dbMEMs
-# Using marineDistances (Klein et al. 2024)
+# Using marineDistances
 # Requires GSHHS_h_L1.shp in working directory
 # ============================================================
 
