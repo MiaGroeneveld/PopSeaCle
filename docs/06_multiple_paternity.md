@@ -19,7 +19,7 @@ populations --in-path $ASSEMBLY --out-path $OUT --popmap combined_popmap.txt \
 vcftools --vcf $OUT/populations.snps.vcf --minGQ 20 --minDP 5 --max-missing 1 \
   --recode --recode-INFO-all --out MP_combined_GQ20_DP5_MISS1.0
 
-# remove a duplicate sample (48 to 47 individuals)
+# remove a PD1 (48 to 47 individuals)
 vcftools --vcf MP_combined_GQ20_DP5_MISS1.0.recode.vcf --remove-indv PD1 \
   --recode --recode-INFO-all --out MP_combined_noPD1
 
@@ -50,14 +50,14 @@ populations --in-path $ASSEMBLY --out-path $FAMILY_OUT --popmap family_individua
 | Section | What it does | Main settings |
 |---|---|---|
 | COLONY input | reads the STRUCTURE file (`skip = 2` for the two header lines of the Stacks output), and writes the offspring genotypes, the mother genotype, the marker file with the error rate and the known maternal sibship, with and without SC3 | genotype error rate 0.01, allelic dropout 0 |
-| Kinship heatmaps | pairwise genetic distance (`adegenet::bitwise.dist`) and KING-robust kinship (`SNPRelate::snpgdsIBDKING`) among the pups | `MP_heatmaps_combined.pdf/png` |
+| Kinship heatmaps | pairwise genetic distance (`adegenet::bitwise.dist`) and KING-robust kinship (`SNPRelate::snpgdsIBDKING` - run in R on all 47 individuals then subset) among the pups | `MP_heatmaps_combined.pdf/png` |
 | Relatedness | plots of the empirical LynchRD, TrioML and DyadML estimates from the cluster, with the simulated distributions | |
 | PISibs | probability of identity for siblings (Waits et al. 2001), per locus and cumulative, for the family individuals | |
-| IBD | `SNPRelate` after LD pruning (r² threshold 0.2, seed 123): method of moments (`snpgdsIBDMoM`) and maximum likelihood (`snpgdsIBDMLE`) for SC1 to SC12 | `SC1_to_SC12_IBD_matrix.csv`, `SC1_to_SC12_IBD_MLE_results.csv` |
+| IBD | `SNPRelate` method of moments (`snpgdsIBDMoM`) and maximum likelihood (`snpgdsIBDMLE`) for SC1 to SC12 | `SC1_to_SC12_IBD_matrix.csv`, `SC1_to_SC12_IBD_MLE_results.csv` |
 
 ### COLONY
 
-COLONY (full-likelihood method) is run in its graphical interface with the input files written by the script: female and male polygamy, dioecious, diploid, without inbreeding and without clones, medium run length, 5 runs, random seed 1234, no sibship prior, sibship scaling, allele frequencies estimated during the analysis (not updated), genotype error rate 0.01, allelic dropout 0, mother SC12 as the known female with probability 1, and all pups as a known maternal sibship. A second run excludes SC3.
+COLONY (full-likelihood method) is run in its graphical interface with the input files written by the script. A second run excludes SC3.
 
 ### Relatedness simulation
 
