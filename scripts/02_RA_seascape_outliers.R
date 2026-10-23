@@ -13,7 +13,7 @@ library(ggplot2)    # visualisation
 library(readxl)     # Excel file loading (not needed if all CSV)
 
 # ── Parameters — define once, use throughout ──────────────────────────────────
-# All key analytical values defined here for transparency and reproducibility
+# All key analytical values defined here
 # Change values here only — not throughout the script
 
 VCF_FILE      <- "RApop_set1.snps.vcf"  # set1: MAC>=3, n=71, 27,562 SNPs
@@ -469,7 +469,7 @@ cat("pcadapt outliers:", length(outliers_pcadapt_names),
 # Bio-ORACLE v3.0 (Assis et al. 2024) — biooracler package
 # MARSPEC (Sbrocco & Barber 2013) — sdmpredictors package
 # 11 starting variables
-# Chlorophyll excluded: r=1.00 with phytoplankton carbon (phyc)
+# Chlorophyll excluded: r=1.00 with phytoplankton (phyc)
 # MARSPEC bathymetry used instead of Bio-ORACLE v3 bathymetry:
 #   Bio-ORACLE v3 cell-mean depth averaging produced anomalous
 #   values (-909m) for shallow coastal Réunion Island samples
@@ -500,7 +500,6 @@ stopifnot(all(env_data_11$ID == popmap$ID))
 cat("Env data-popmap order consistent ✓\n")
 
 # ── Option B: Re-extract from scratch (uncomment if needed) ──────────────────
-# WARNING: Bio-ORACLE extraction takes ~2-3 hours
 # Requires internet connection and biooracler package
 # Use corrected RA_coordinates.csv (Réunion Island corrections applied)
 #
@@ -553,8 +552,6 @@ cat("Env data-popmap order consistent ✓\n")
 # # phyc_range  — phytoplankton carbon seasonality; productivity variability
 # # sws_mean    — current velocity mean; dispersal potential, energy expenditure
 # # sws_range   — current velocity range; flow variability
-# # Note: chlorophyll excluded — r=1.00 with phyc (same underlying process)
-# # Note: thetao_ltmin/ltmax excluded — redundant with mean + range
 #
 # thetao_df <- extract_biooracle_points(
 #   "thetao_baseline_2000_2019_depthsurf",
@@ -659,7 +656,7 @@ cat("Section 4 complete\n")
 # SECTION 5: Marine Distances and dbMEMs
 # marineDistances (Assis et al. — https://github.com/jorgeassis/marineDistances)
 # Shortest-path algorithm with infinite resistance of landmasses
-# Resolution = 0.5 degrees; runtime ~8 hours
+# Resolution = 0.5 degrees; runtime ~8 hours (ran overnight, kept laptop open)
 # Requires GSHHS_h_L1.shp and associated files in working directory
 # Download: https://www.soest.hawaii.edu/pwessel/gshhg/
 # PCoA correction applied to obtain Euclidean distances
@@ -687,7 +684,6 @@ stopifnot(all(rownames(as.data.frame(dbmems)) == coords$ID))
 cat("Marine distances-coords alignment ✓\n")
 
 # ── Option B: Re-run marineDistances (uncomment if needed) ───────────────────
-# WARNING: ~8 hours runtime on laptop
 # Requires GSHHS_h_L1.shp shapefile in working directory
 #
 # write.table(
@@ -888,7 +884,6 @@ cat("SSS range correlation with MEM1:", round(r_sss_mem1, 3), "\n")
 # SSS range is removed instead: r=0.93 with MEM1 confirms it
 # captures the same broad-scale geographic-salinity gradient
 # rather than an independent environmental signal
-# Reference: Forester et al. 2018, Capblancq & Forester 2021
 
 env_final_4 <- env_final[env_final != "MS_biogeo11_sss_range_5m"]
 cat("Final env variables after manual SSS range removal:",
@@ -948,7 +943,6 @@ cat("VIF range:", round(min(vif_final$VIF), 3),
 # spatial population structure
 # 999-permutation ANOVA for model and axis significance
 # Variance partitioning: env alone, space alone, shared, residual
-# Reference: Capblancq & Forester 2021
 #
 # NOTE: pRDA already run on HPC — load results below
 # HPC scripts: RA_set1_partialRDA.R and RA_set1_partialRDA.sh
@@ -1014,7 +1008,6 @@ cat("Section 8 complete\n")
 # Candidate loci under environmental selection identified
 # using 3 SD threshold on each significant RDA axis
 # Applied to RDA1, RDA2, RDA3 only (RDA4 p=0.359 excluded)
-# Reference: Forester et al. 2018
 # Result: 846 outliers (3.1% of 27 562 SNPs)
 # ============================================================
 
@@ -1034,7 +1027,6 @@ cat("Axes:", colnames(rda_scores), "\n")
 # ── 3SD threshold per axis ────────────────────────────────────────────────────
 # Loci exceeding ±3 SD from mean on any significant axis
 # are considered candidates under environmental selection
-# Reference: Forester et al. 2018, Capblancq & Forester 2021
 
 outliers_per_axis <- list()
 for (ax in colnames(rda_scores)) {
@@ -1229,7 +1221,6 @@ cat("  RA_set1_SNP_cluster_labelled.pdf/png — inspection\n")
 # Multiple testing: BH FDR correction across all 846×4=3,384 tests
 # Strong effect: |r|>0.5 (Cohen 1988 large effect, r²>0.25)
 # Variables ranked by % candidates showing significant associations
-# Reference: Forester et al. 2018, Capblancq & Forester 2021
 
 R_STRONG <- 0.5  # large effect size threshold (Cohen 1988)
 
@@ -1380,7 +1371,7 @@ cat("RDA outliers:", length(outliers_rda),
 # FDR threshold: q<0.01 (stricter than pcadapt q<0.05)
 #   rationale: LFMM univariate tests produce more candidates
 #   per locus — stricter threshold controls false positives
-# Result: 1,762 outliers (6.4% of 27,562 SNPs)
+# Result: 1 762 outliers (6.4% of 27,562 SNPs)
 # ============================================================
 
 library(LEA)
@@ -1393,7 +1384,7 @@ library(vegan)  # for bstick()
   cat("Objects loaded:", ls(), "\n")
   cat("LFMM outliers:", length(outliers_lfmm_names), "\n")
   cat("GIF:", round(gif, 3), "\n")
-  # Expected: 1,762 outliers, GIF=2.033
+  # Expected: 1 762 outliers, GIF=2.033
 
 # ── Option B: Rerun LFMM (if results file missing/corrupted) ─────────────────
 
@@ -1423,7 +1414,6 @@ env_pca <- prcomp(env_all_lfmm, scale = TRUE, center = TRUE)
 
 # Broken stick criterion — retain PCs with eigenvalues
 # exceeding those expected from random distribution
-# Reference: King & Jackson 1999
 eigenvalues <- env_pca$sdev^2 / sum(env_pca$sdev^2)
 bstick_vals <- bstick(length(env_pca$sdev))
 n_pcs       <- sum(eigenvalues > bstick_vals)
@@ -1607,8 +1597,7 @@ cat("GIF:", round(gif, 3), "\n")
 # RDA (env GEA), pcadapt (structure-based), LFMM (univariate GEA)
 # OutFLANK excluded — 0 outliers due to strong population
 # structure inflating FST null distribution (Section 2)
-# High-confidence: detected by ≥2 methods (Forester et al. 2018)
-# Reference: Capblancq & Forester 2021
+# High-confidence: detected by ≥2 methods
 # ============================================================
 
 # ── Verify all three outlier sets are available ───────────────────────────────
@@ -2011,7 +2000,6 @@ cat("Section 14 complete — all maps saved\n")
 # Selected from RDA environmental candidates (n=846)
 # Points coloured by population — all 7 populations included
 # FDR-corrected p-values shown (BH, Section 9)
-# Reference: Forester et al. 2018
 # ============================================================
 
 # ── Use cor_r already computed in Section 9 ──────────────────────────────────
