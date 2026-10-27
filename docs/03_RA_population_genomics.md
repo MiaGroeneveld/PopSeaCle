@@ -24,13 +24,14 @@ MZ (Mozambique, n = 28), TZ (Tanzania, 8), MD (Madagascar, 2), RI (Réunion Isla
 | 10 | Diversity statistics figure (neutral against adaptive) | reads `diversity.xlsx`, a table compiled from the section 1 and 2 results | `diversity_neutral_vs_adaptive.pdf/png` |
 | 11 | Sampling map | `sf` and `rnaturalearth` | `RA_IndoPacific_zoomed_out.png/pdf` |
 
-### Isolation by distance and environment (section 9)
-
-Linearised pairwise FST (FST / (1 - FST)) was the response. Geographic distances are marine least-cost distances averaged to the population level, and environmental distances are Bray-Curtis, Manhattan or Canberra dissimilarities of the population mean values of the four environmental variables retained in the RDA (standardised), with the metric chosen by AIC (Canberra for three of the four datasets, so Canberra is used throughout). Three models (IBD only, IBE only, combined) were fitted with `gls()` from `nlme` by maximum likelihood to obtain AIC values for comparison. Significance of IBD and IBE was assessed with 10 000 permutations of the pairwise genetic values, with R² taken from the observed correlation. Pairwise comparisons share populations, so the p-values and AIC comparisons are indicative.
-
 ## Input
 
 Objects from stage 2 (`RA_seascape_FINAL_checkpoint.RData`) and the stage 1 VCF (`RApop_set1.snps.vcf`). The diversity figure (section 10) also needs `diversity.xlsx`, a table compiled from the section 1 and 2 results that is not produced by code in this repository.
 
-### note on FST (including stage 4)
+### Isolation by distance and environment (section 9)
+
+Linearised pairwise FST (FST / (1 - FST)) was the response. Geographic distances are marine least-cost distances averaged to the population level, and environmental distances are Bray-Curtis, Manhattan or Canberra dissimilarities of the population mean values of the four environmental variables retained in the RDA (standardised), with the metric chosen by AIC (Canberra for three of the four datasets, so Canberra is used throughout). Three models (IBD only, IBE only, combined) were fitted with `gls()` from `nlme` by maximum likelihood to obtain AIC values for comparison. Significance of IBD and IBE was assessed with 10 000 permutations of the pairwise genetic values, with R² taken from the observed correlation. Pairwise comparisons share populations, so the p-values and AIC comparisons are indicative.
+
+### note on FST (applicable to stage 4 as well)
+
 A pair of populations is called significant when the lower bound of its 95% bootstrap confidence interval (1 000 replicates over loci) is above zero. The scripts assign such pairs p = 0.001 (otherwise p = 1) and then apply a Benjamini-Hochberg adjustment, which does not change which pairs are significant. The ***, ** and * labels the code prints come from that adjustment, and the dissertation figures use a single asterisk = significant, α = 0.05 instead. Significance testing will be recalculated for the manuscript version.
