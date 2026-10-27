@@ -211,6 +211,7 @@ write.csv(wm, "RA_set1_diversity_weighted_means.csv", row.names = FALSE)
 
 ## Pairwise FST and Heatmap — RA set1, all four datasets
 ## hierfstat pairwise WCfst, 1000 bootstrap CIs, BH correction
+## Note: BH correction does not make a difference. Significance testing will be redone for the manuscript version
 ## Heatmap: neutral upper diagonal, adaptive lower diagonal
 
 library(hierfstat)
