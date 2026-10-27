@@ -14,7 +14,7 @@ MZ (Mozambique, n = 28), TZ (Tanzania, 8), MD (Madagascar, 2), RI (Réunion Isla
 |---|---|---|---|
 | 1 | Diversity statistics: HO, HE, FIS | `hierfstat`; 95% confidence intervals for FIS from 500 bootstrap resamples of loci | `RA_set1_diversity_results.RData` |
 | 2 | Allelic richness and private alleles | richness rarefied to the smallest sample (`hierfstat::allelic.richness`); private alleles counted as loci with `poppr::private_alleles` | `RA_set1_AR_PA_all_datasets.csv`, `RA_set1_AR_PA_results.RData` |
-| 3 | Pairwise and global FST | Weir and Cockerham (`hierfstat`); 1000 bootstraps over loci; Benjamini-Hochberg correction | `RA_set1_FST_results.RData` |
+| 3 | Pairwise and global FST | Weir and Cockerham (`hierfstat`); 1000 bootstraps over loci | `RA_set1_FST_results.RData` |
 | 4 | FST heatmaps | neutral above and adaptive below the diagonal (main text); high confidence and environmental (supplement) | `RA_set1_FST_heatmap*.pdf` |
 | 5 | DAPC | PCs explaining 80% of variance; `find.clusters` for K = 1 to 10 (BIC); `xvalDapc` (100 replicates, 90% training set) and `optim.a.score` (100 simulations); with and without population priors | `RA_set1_DAPC_summary_table.csv`, one results file per dataset |
 | 6 | Adaptive DAPC without Australia | Australia (n = 2) removed because its extreme scores compress the rest of the plot | `RA_set1_adaptive_dapc_noAU_results.RData` |
