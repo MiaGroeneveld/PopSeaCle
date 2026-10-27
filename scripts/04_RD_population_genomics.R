@@ -136,6 +136,7 @@ save(pairwise_fst, pvals_mat, global_fst,
 # SECTION 2 (updated): Pairwise FST heatmap
 # Upper triangle: FST values
 # Lower triangle: significance symbols (BH-corrected p-values)
+# Note: BH correction does not make a difference. Significance testing will be redone for the manuscript version
 # Diagonal: white / blank
 # ============================================================
 
